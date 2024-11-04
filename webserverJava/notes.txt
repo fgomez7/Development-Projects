@@ -1,0 +1,65 @@
+- make programs talk over a network. This is called socket programming. 
+- the data sent over the network must conform to a specific format called a 'protocol'
+- learn how to create or implement any network protocols by using HTTP as the target
+- HTTP  protocol sits above the TCP protocol
+- TCP is a bidirectional channel for transmitting raw bytes
+- HTTP request consists of a header followed by an optional payload. The header contains the URL of the request, or the response code, followed by a list of header fields.
+- When backend developer talks about an "API", they likely mean an HTTP-based one, even for internal software services
+- HTTP/1.0 doesn't support multiple requests over a single connection
+- HTTP/1.1 supports multiple requests over a single connection and became a practical protocol
+- HTTP/2 is a binary protocol that multiplexes multiple requests over a single connection
+    - Server push, which is sending resources to the client before the client requests them
+    - Multiplexing of multiple requests over a single TCP connection, which is an attempt to address head-of-line blocking.
+- HTTP/3 is much larger than the previous versions. It replaces TCP and uses UDP. 
+    - It needs to replicate most of the functionality of TCP, the alternative is called QUIC
+    - QUIC are userspace congestion control, multiplexing, and head-of-line blocking. 
+- Network protocols aer divided into different layers, where the higher layer depends on the lower layer, and each layer provides different capacities.
+
+- The layer below TCP is the IP layer. Each IP packet is a message with 3 components.
+    - The sender's address
+    - The receiver's address
+    - The message data
+- layer above IP packets, TCP provides
+    - Byte streams instead of packets
+    - reliable and ordered delivery
+    - A protocol rather than the application is used to make sense of these bytes. 
+    - data is read in one pass
+- UDP is on the same layer as TCP, but is still packet-based like the lower layer. UDP just adds port numbers over IP packets
+
+TCP BYTE STREAM  VS  UDP PACKET
+- difference: boundaries
+    - UDP: each read from a socket corresponds to a single write from the peer. 
+    - TCP: No such correspondence! Data is a continuous flow of bytes
+- Protocols are required to interpret TCP  data by imposing boundaries within the byte stream
+
+BYTE STREAM  VS  PACKET: DNS as an EXAMPLE
+- DNS (domain name to IP address lookup)
+- client sends a single request, server sends single response. DNS message is encapsulated in a UDP packet. 
+
+- when each peer can send and receive at the same time (e.g. WebSocket), this is called full-dupliex communication
+
+- A socket handle is a simple file descriptor. In node.js, socket handles are wrapped into JS objects with methonds on them
+    - Listening sockets. Obtained by listening on an address
+    - Connection sockets. Obtained by accepting a client connection from a listening socket
+- Closing a socket terminates a connection and causes the TCP FIN to be sent. Once the handle is gone, you cannot do anything with it
+- you can also shutdown your side of the transmission (also send FIN) while still being able to receive data from the peer; this is called half-open connection
+
+LIST OF SOCKET PRIMITIVES __IMPORTANT__
+- Listening socket: 
+    - blind & listen
+    - accept
+    -close
+- connection socket: 
+    - read
+    - write
+    - close
+
+- if peer A half-closes the connection to peer B:
+    - A cannot send any more data, but can still receive from B
+    - B gets EOF, but can still send to A
+
+Create a post via PUT.
+Read a post via GET.
+Update a post via PATCH.
+Delete a post via DELETE.
+These 4 verbs are often referred to as CRUD.

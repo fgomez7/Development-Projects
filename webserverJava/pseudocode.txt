@@ -1,0 +1,107 @@
+EVENT LOOP & CONCURRENCY
+// pseudo code!
+while (running){ // keep looping as long as the program is running
+    let events = wait_for_events(); // blocking // wait for something to happen(like a new connection)
+    for (let e of events){ // go through each event that has happened
+        do_something(e);    //may invoke callbacks // handle event, which might involve running a       callback function
+    }
+}
+________________________________________________________________________________________________________
+// 
+
+Waiting for Events:
+
+The event loop is like a loop (a cycle) that keeps running as long as your Node.js program is active.
+Imagine the loop as a "to-do list" that the runtime keeps checking over and over.
+The runtime (Node.js) asks the operating system (your computer) if there are any events that have happened, like someone trying to connect to your server or some data arriving that needs to be read.
+Handling Events:
+
+When an event happens, like a new connection, the event loop checks its "to-do list" to see what it needs to do in response.
+It might see that you've told it to run a certain function when a new connection arrives. This function is called a callback because it's called back when the event happens.
+The event loop runs the callback, which is the code you wrote to handle that specific event.
+//
+________________________________________________________________________________________________________
+// promise
+filehandle.read([options]);
+
+const fs = require('fs').promises;
+fs.readFile('example.txt')
+  .then(data => console.log(data.toString()))
+  .catch(err => console.error(err));
+
+// readFile returns a promise. The .then method handles the result when it is ready 
+// .catch handles any errors
+
+// callback
+fs.read(fd[, options], callback);
+
+const fs = require('fs');
+fs.readFile('example.txt', (err, data) => {
+    if (err) throw err;
+    console.log(data.toString());
+});
+
+// readFile function starts reading a file. Instead of waiting for the file to be read, node.js moves onto other tasks. 
+// once the file has been read, it calls the callback function to handle the result. 
+
+// synchronous, do not use!
+fs.readSync(fd, buffer[, options]);
+
+// avoid synchronous programming in network applications since it blocks the event loop. The longer you work on the task, the longer the event loop is halted. 
+// they exist for simple use cases such as scripting or other cases that don't depend on the event loop at all.
+________________________________________________________________________________________________________
+
+//  Promise
+
+while (running) {
+    let socket = await server.accept(); // Waits for a new connection
+    newConn(socket);    // Handles the new connection
+}
+
+await server.accept(); waits for a new connection to be accepted because `await` doesn't move to the next line until a connection has been made. But it is still non blocking because the event loop is free to handle other tasks during the wait.
+
+newConn(socket): once a connection has been accepted, newConn is called to handle it. This function can start right away without having to wait on other tasks to be finished. 
+
+________________________________________________________________________________________________________
+
+// Introduction to 'async' and 'await'
+
+function my_app() {
+    do_something_cb((err, result) => {
+        if (err) {
+            //fail
+        } else {
+            // success, use the result
+        }
+    });
+}
+
+// an example of using await on a promise. The application logic continues in the same async function
+
+function do_something_promise(): Promise<T>;
+
+async function my_app(){
+    try{
+        const result: T = await do_something_promise();
+    } catch (err){
+        // fail
+    }
+}
+
+//Creating promises
+function do_something_promise(){
+    return new Promise<T>((resolve, reject) => {    // Executor function starts here
+        do_something_cb((err, result) =>{           // The callback-based function
+            if (err) {
+                reject(err);        //call reject if error
+            } else {
+                resolve(result);    //call resolve if the operation is successful
+            }
+        });
+    });
+} //an example of creating promises: converting a callback-based API to promise-based
+
+Callbacks are unavoidable in js. When creating a promise object, an EXECUTOR callback is passed as an argument to recieve 2 more callbacks
+    - resolve() causes the await statement to return a value
+    - reject() causes the await statement to throw an exception
+In executor function, you call original callback-based API 'do_something_cb' which takes an error if something goes wrong or result if the operation succeeds
